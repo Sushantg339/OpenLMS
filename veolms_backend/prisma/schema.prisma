@@ -1,0 +1,179 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT @map("student")
+  ADMIN   @map("admin")
+}
+
+enum Provider {
+  RAZORPAY @map("razorpay")
+  STRIPE   @map("stripe")
+}
+
+enum PaymentStatus {
+  CREATED @map("created")
+  PAID    @map("paid")
+  FAILED  @map("failed")
+}
+
+enum LessonStatus {
+  DRAFT       @map("draft")
+  UPLOADING   @map("uploading")
+  PROCESSING  @map("processing")
+  READY       @map("ready")
+  FAILED      @map("failed")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role     @default(STUDENT)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  createdCourses Course[]
+  enrollments    Enrollment[]
+  payments       Payment[]
+  lessonProgress LessonProgress[]
+
+  @@map("users")
+}
+
+model Course {
+  id               String   @id @default(uuid())
+  title            String
+  slug             String   @unique
+  description      String?
+  thumbnailUrl     String?  @map("thumbnail_url")
+  trailerVideoUrl  String?  @map("trailer_video_url")
+  price            Int
+  instructorName   String   @map("instructor_name")
+  isPublished      Boolean  @default(false) @map("is_published")
+
+  createdBy        String   @map("created_by")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  creator          User @relation(fields: [createdBy], references: [id])
+
+  sections         Section[]
+  enrollments      Enrollment[]
+  payments         Payment[]
+
+  @@index([createdBy])
+  @@map("courses")
+}
+
+model Section {
+  id         String @id @default(uuid())
+  courseId   String @map("course_id")
+  title      String
+  orderIndex Int    @map("order_index")
+
+  course     Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  lessons    Lesson[]
+
+  @@unique([courseId, orderIndex])
+  @@index([courseId])
+  @@map("sections")
+}
+
+
+
+model Lesson {
+  id              String       @id @default(uuid())
+  sectionId       String       @map("section_id")
+  title           String
+  videoUrl        String?      @map("video_url")
+  rawUploadKey    String?      @map("raw_upload_key")
+  status          LessonStatus @default(DRAFT)
+  durationSeconds Int?         @map("duration_seconds")
+  isPreview       Boolean      @default(false) @map("is_preview")
+  orderIndex      Int          @map("order_index")
+
+  section  Section          @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  progress LessonProgress[]
+
+  @@unique([sectionId, orderIndex])
+  @@map("lessons")
+}
+
+model Payment {
+  id                String @id @default(uuid())
+
+  userId            String @map("user_id")
+  courseId          String @map("course_id")
+
+  provider          Provider
+
+  providerOrderId   String  @map("provider_order_id")
+  providerPaymentId String? @map("provider_payment_id")
+
+  amount            Int
+  currency          String  @default("INR")
+
+  status            PaymentStatus @default(CREATED)
+
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  user              User   @relation(fields: [userId], references: [id])
+  course            Course @relation(fields: [courseId], references: [id])
+
+  enrollment        Enrollment?
+
+  @@index([userId])
+  @@index([courseId])
+  @@map("payments")
+}
+
+model Enrollment {
+  id         String   @id @default(uuid())
+
+  userId     String   @map("user_id")
+  courseId   String   @map("course_id")
+  paymentId  String   @unique @map("payment_id")
+
+  enrolledAt DateTime @default(now()) @map("enrolled_at")
+
+  user       User    @relation(fields: [userId], references: [id])
+  course     Course  @relation(fields: [courseId], references: [id])
+  payment    Payment @relation(fields: [paymentId], references: [id])
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@map("enrollments")
+}
+
+model LessonProgress {
+  id             String   @id @default(uuid())
+
+  userId         String   @map("user_id")
+  lessonId       String   @map("lesson_id")
+
+  watchedSeconds Int      @default(0) @map("watched_seconds")
+  completed      Boolean  @default(false)
+
+  lastWatchedAt  DateTime @updatedAt @map("last_watched_at")
+
+  user           User   @relation(fields: [userId], references: [id])
+  lesson         Lesson @relation(fields: [lessonId], references: [id])
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@index([lessonId])
+  @@map("lesson_progress")
+}
