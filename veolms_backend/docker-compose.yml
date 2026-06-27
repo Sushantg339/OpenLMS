@@ -1,0 +1,59 @@
+version: "3.9"
+services:
+  lms_db:
+    image: postgres
+    container_name: postgres_lms
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=lms
+      - POSTGRES_USER=postgres
+    volumes:
+      - lms_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d lms"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    
+
+  cache_db:
+    image: redis
+    container_name: redis_lms
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+    volumes:
+      - cache_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+  
+  lms_backend:
+    build: .
+    container_name: lms_backend
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+      - 5000:5000
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://postgres:root@lms_db:5432/lms
+      - REDIS_URL=redis://cache_db:6379
+      - PORT=3000
+    depends_on:
+      lms_db:
+        condition: service_healthy
+      cache_db:
+        condition: service_healthy
+
+volumes:
+  lms_data:
+  cache_data:
