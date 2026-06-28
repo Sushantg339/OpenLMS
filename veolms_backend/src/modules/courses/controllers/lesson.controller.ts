@@ -22,7 +22,7 @@ export const createLesson: RequestHandler = asyncHandler(async(req , res)=>{
         })
     }
 
-    const {title, isPreview, orderIndex} = parsed.data
+    const {title, isPreview, orderIndex, videoUrl} = parsed.data
 
     const section = await prisma.section.findUnique({ where: { id: sectionId as string } })
 
@@ -60,7 +60,8 @@ export const createLesson: RequestHandler = asyncHandler(async(req , res)=>{
             title,
             isPreview: isPreview || false,
             orderIndex,
-            sectionId: sectionId as string
+            sectionId: sectionId as string,
+            ...(videoUrl && { videoUrl, status: "READY" }),
         }
     })
 
@@ -91,7 +92,7 @@ export const updateLessonDetails: RequestHandler = asyncHandler(async(req , res)
         })
     }
 
-    const {title, isPreview, orderIndex} = parsed.data
+    const {title, isPreview, orderIndex, videoUrl} = parsed.data
 
     const lesson = await prisma.lesson.findUnique({
         where: {
@@ -110,10 +111,23 @@ export const updateLessonDetails: RequestHandler = asyncHandler(async(req , res)
         })
     }
 
+    if (videoUrl && lesson.rawUploadKey) {
+        return res.status(409).json({
+            success: false, 
+            data: null, 
+            message: "Cannot set an external URL on this lesson",
+            error: { 
+                message: "This lesson already has an uploaded video. Remove it first, or create a new lesson for external content." 
+            }
+        })
+    }
+
     const updateData = {
         title: title ?? lesson.title,
         isPreview: isPreview ?? lesson.isPreview,
-        orderIndex: orderIndex ?? lesson.orderIndex
+        orderIndex: orderIndex ?? lesson.orderIndex,
+        videoUrl: videoUrl ?? lesson.videoUrl,
+        ...(videoUrl && { status: "READY" as const })
     }
 
     const updatedLesson = await prisma.lesson.update({

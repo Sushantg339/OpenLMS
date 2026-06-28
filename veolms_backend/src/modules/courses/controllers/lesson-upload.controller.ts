@@ -41,6 +41,17 @@ export const requestUploadUrl = asyncHandler(async (req, res) => {
         })
     }
 
+    if (lesson.videoUrl && !lesson.rawUploadKey) {
+        return res.status(409).json({
+            success: false,
+            data: null, 
+            message: "Cannot upload a video for this lesson",
+            error: { 
+                message: "This lesson already has an external video URL. Remove it first if you want to upload a file instead." 
+            }
+        })
+    }
+
     const { fileName, contentType } = parsed.data
     const ext = fileName.split(".").pop()?.toLowerCase()
 
