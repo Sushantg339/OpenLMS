@@ -1,5 +1,7 @@
 import express from "express"
 import cookieParser from "cookie-parser"
+import helmet from "helmet"
+import cors from "cors"
 
 import authRouter from "./modules/auth/routes/auth.routes.js"
 import errorHandler from "./middlewares/error.middleware.js"
@@ -9,15 +11,28 @@ import lessonRouter from "./modules/courses/routes/lesson.routes.js"
 import paymentRouter from "./modules/payments/routes/payment.routes.js"
 import dashboardRouter from "./modules/dashboard/routes/dashboard.routes.js"
 import adminRouter from "./modules/admin/routes/admin.routes.js"
+import { corsOptions } from "./config/cors.config.js"
+import { generalLimiter } from "./middlewares/rateLimiter.middleware.js"
 
 const app = express()
 
-// webhook raw req.body
+// proxy for Railway/Render
+app.set('trust proxy', 1)
+
+// security 
+app.use(helmet())
+app.use(cors(corsOptions))
+
+
+// raw body for webhook signature verification
 app.use('/api/v1/payments/webhook', express.raw({ type: 'application/json' }))
 
 // global middlewares
-app.use(express.json())
+app.use(express.json({limit: '50kb'}))
 app.use(cookieParser())
+
+// rateLimiter
+app.use(generalLimiter)
 
 // routes
 app.use('/api/v1/auth', authRouter)
