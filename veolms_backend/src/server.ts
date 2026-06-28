@@ -13,7 +13,7 @@ const startServer = async()=>{
             console.log('server is running on port ' + PORT)
         })
 
-        seedDataToDB()
+        await seedDataToDB()
     } catch (error) {
         console.log('Internal server error', error)
         process.exit(1)

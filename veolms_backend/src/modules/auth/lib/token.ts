@@ -76,9 +76,9 @@ export const generateAccessToken = (id: string, res: Response)=>{
 
     res.cookie("accessToken", accessToken, {
         httpOnly: true,
-        secure: NODE_ENV === "production",
-        sameSite: NODE_ENV == "production" ? "lax" : "none",
-        maxAge: 15*60*1000
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
+        maxAge: ACCESS_TOKEN_TTL,
     })
 }
 
