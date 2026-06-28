@@ -66,9 +66,32 @@ export const createOrder = asyncHandler(async (req, res) => {
         })
     }
 
+    const existingPayment = await prisma.payment.findFirst({
+        where: {
+            courseId,
+            userId,
+            status: "CREATED"
+        }
+    })
+
+    if(existingPayment){
+        return res.status(200).json({
+        success: true,
+        message: "Pending order found",
+        data: {
+            orderId: existingPayment.providerOrderId,
+            amount: course.price,
+            currency: "INR",
+            keyId: RAZORPAY_KEY_ID,   // public key — safe to send to frontend
+            paymentId: existingPayment.id,
+        },
+        error: null
+    })
+    }
+
     // Price comes from the DB, never from the client — never trust a client-sent amount
     const razorpayOrder = await razorpay.orders.create({
-        amount: course.price * 100,
+        amount: course.price,
         currency: "INR",
         notes: { courseId, userId }
     })

@@ -309,3 +309,61 @@ export const deleteCourse = asyncHandler(async (req, res) => {
         error: null,
     })
 })
+
+export const fetchCourseById: RequestHandler = asyncHandler(async (req, res) => {
+    const { id } = req.params
+
+    const course = await prisma.course.findUnique({
+        where: { id: id as string },   // no isPublished filter — admin needs to see drafts too
+        select: {
+            id: true,
+            title: true,
+            slug: true,
+            description: true,
+            thumbnailUrl: true,
+            trailerVideoUrl: true,
+            price: true,
+            instructorName: true,
+            isPublished: true,
+            createdAt: true,
+            sections: {
+                orderBy: { orderIndex: "asc" },
+                select: {
+                    id: true,
+                    title: true,
+                    orderIndex: true,
+                    lessons: {
+                        orderBy: { orderIndex: "asc" },
+                        select: {
+                            id: true,
+                            title: true,
+                            videoUrl: true,        // fine to expose here — admin-only route, unlike the public one
+                            status: true,
+                            durationSeconds: true,
+                            isPreview: true,
+                            orderIndex: true,
+                            // rawUploadKey intentionally omitted — it's an internal storage pointer,
+                            // not something the admin UI needs to render or edit
+                        },
+                    },
+                },
+            },
+        },
+    })
+
+    if (!course) {
+        return res.status(404).json({
+            success: false,
+            message: "Course not found",
+            data: null,
+            error: { message: "No course found for this id." },
+        })
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: "Course fetched successfully",
+        data: course,
+        error: null,
+    })
+})

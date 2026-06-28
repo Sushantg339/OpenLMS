@@ -8,7 +8,6 @@ import { r2Client, R2_BUCKET } from "../../../lib/r2.js"
 import { requestUploadUrlSchema } from "../zod/lesson-upload.schema.js"
 import { prisma } from "../../../lib/prisma.js"
 import asyncHandler from "../../../utils/asyncHandler.js"
-import envConfig from "../../../config/env.config.js"
 
 const ALLOWED_EXTENSIONS = ["mp4", "webm"]
 
@@ -115,7 +114,7 @@ export const confirmUpload = asyncHandler(async (req, res) => {
         })
     }
 
-    const MAX_SIZE_BYTES = 2 * 1024 * 1024 * 1024 // 2GB cap, adjust as needed
+    const MAX_SIZE_BYTES = 2 * 1024 * 1024 * 1024 // 2GB cap
     if ((head.ContentLength ?? 0) > MAX_SIZE_BYTES) {
         return res.status(400).json({
             success: false, 
@@ -130,11 +129,10 @@ export const confirmUpload = asyncHandler(async (req, res) => {
     // Option A: no transcoding — serve straight from R2/CDN via a public-but-namespaced path.
     // (We still gate the actual playback URL behind enrollment in the lesson-fetch endpoint,
     // same access-flag pattern as the course-details controller.)
-    const publicUrl = `${envConfig.R2_PUBLIC_BASE_URL}/${lesson.rawUploadKey}`
 
     const updated = await prisma.lesson.update({
         where: { id: lessonId as string },
-        data: { videoUrl: publicUrl, status: "READY" },
+        data: { status: "READY" },
     })
 
     return res.status(200).json({

@@ -10,6 +10,9 @@ import paymentRouter from "./modules/payments/routes/payment.routes.js"
 
 const app = express()
 
+// webhook raw req.body
+app.use('/api/v1/payments/webhook', express.raw({ type: 'application/json' }))
+
 // global middlewares
 app.use(express.json())
 app.use(cookieParser())
