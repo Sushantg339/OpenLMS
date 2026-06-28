@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { ZodError } from "zod";
+import multer from "multer";
 
 import ApiError from "../utils/ApiError.js";
 
@@ -59,6 +60,17 @@ export const errorHandler = (err: unknown, _req: Request, res: Response, _next: 
         default:
             error = new ApiError(500, err.message);
             error.isOperational = false;
+        }
+    } else if (err instanceof multer.MulterError) {
+        switch (err.code) {
+            case "LIMIT_FILE_SIZE":
+                error = new ApiError(413, "File too large.");
+                break;
+            case "LIMIT_UNEXPECTED_FILE":
+                error = new ApiError(400, "Unexpected file field. Check the field name in your form-data.");
+                break;
+            default:
+                error = new ApiError(400, err.message);
         }
     } else if (err instanceof ApiError) {
         error = err;
