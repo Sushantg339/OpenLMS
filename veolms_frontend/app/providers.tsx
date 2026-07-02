@@ -1,17 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuthStore } from "@/lib/stores/auth.store";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
+  const [showLoader, setShowLoader] = useState(true);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return <div suppressHydrationWarning>{children}</div>;
+  if (showLoader) {
+    return <LoadingScreen onFinish={() => setShowLoader(false)} />;
   }
 
   return <>{children}</>;

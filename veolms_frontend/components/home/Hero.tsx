@@ -5,6 +5,8 @@ import { gsap } from "@/lib/gsap";
 import { Button } from "@/components/ui/Button";
 import { ArrowRight } from "lucide-react";
 
+const TRANSITION_DURATION = 0.95;
+
 const SNIPPET = `function learn(skill) {
   return practice(skill)
     .until(confident);
@@ -12,11 +14,24 @@ const SNIPPET = `function learn(skill) {
 
 export function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const transitionRef = useRef<HTMLDivElement>(null);
   const [typed, setTyped] = useState("");
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.2 });
+      const transitionEl = transitionRef.current;
+      const tl = gsap.timeline({ delay: 0.1 });
+
+      if (transitionEl) {
+        gsap.set(transitionEl, { yPercent: 0, opacity: 1 });
+      }
+
+      tl.to(transitionEl, {
+        yPercent: -100,
+        opacity: 0,
+        duration: TRANSITION_DURATION,
+        ease: "power3.inOut",
+      });
 
       const typeTarget = { i: 0 };
       tl.to(typeTarget, {
@@ -26,7 +41,7 @@ export function Hero() {
         onUpdate: () => setTyped(SNIPPET.slice(0, Math.floor(typeTarget.i))),
       });
 
-      tl.from(".hero-eyebrow", { opacity: 0, y: 10, duration: 0.5, ease: "power2.out" }, "-=0.3")
+      tl.from(".hero-eyebrow", { opacity: 0, y: 10, duration: 0.5, ease: "power2.out" }, "-=0.7")
         .from(".hero-headline-line", { opacity: 0, y: 24, duration: 0.7, stagger: 0.08, ease: "power3.out" }, "-=0.2")
         .from(".hero-sub", { opacity: 0, y: 14, duration: 0.6, ease: "power2.out" }, "-=0.4")
         .from(".hero-cta", { opacity: 0, y: 14, duration: 0.6, stagger: 0.08, ease: "power2.out" }, "-=0.45")
@@ -38,6 +53,10 @@ export function Hero() {
 
   return (
     <section ref={containerRef} className="relative overflow-hidden border-b border-ink-700">
+      <div
+        ref={transitionRef}
+        className="pointer-events-none absolute inset-x-0 top-0 z-20 h-full bg-[radial-gradient(circle_at_top,rgba(255,157,46,0.22),transparent_58%),linear-gradient(135deg,#050816_0%,#0d1422_50%,#050816_100%)]"
+      />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(255,157,46,0.08),transparent)]" />
 
       <div className="container-page relative grid gap-12 py-20 lg:grid-cols-[1.1fr,0.9fr] lg:py-28">
