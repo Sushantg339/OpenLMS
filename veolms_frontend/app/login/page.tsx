@@ -71,7 +71,7 @@ export default function LoginPage() {
               value={form.email}
               onChange={handleChange}
               placeholder="you@example.com"
-              autoComplete="email"
+              autoComplete="off"
               required
             />
             <Input
@@ -81,17 +81,17 @@ export default function LoginPage() {
               value={form.password}
               onChange={handleChange}
               placeholder="••••••••"
-              autoComplete="current-password"
+              autoComplete="off"
               required
             />
 
             {error && (
-              <p className="rounded border border-danger-500/30 bg-danger-500/10 px-3 py-2 font-mono text-xs text-danger-400">
+              <p className="rounded border border-danger-500/30 bg-danger-500/10 text-red-500 px-3 py-2 font-mono text-xs text-danger-400">
                 {error}
               </p>
             )}
 
-            <Button type="submit" disabled={loading} className="mt-1 w-full">
+            <Button type="submit" disabled={loading} className="mt-1 w-full cursor-pointer">
               {loading ? "Logging in…" : "Log in"}
             </Button>
           </div>

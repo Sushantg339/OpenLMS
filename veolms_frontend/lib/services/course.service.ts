@@ -13,4 +13,7 @@ export const courseService = {
 
   updateLessonProgress: (lessonId: string, data: { watchedSeconds: number; completed?: boolean }) =>
     api.patch(`/lessons/${lessonId}/progress`, data),
+
+  getProgress: (lessonId: string) =>
+    api.get(`/lessons/${lessonId}/progress`).then((r) => r.data.data).catch(() => null),
 };

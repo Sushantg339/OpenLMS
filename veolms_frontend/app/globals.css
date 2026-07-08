@@ -36,6 +36,11 @@
   }
 }
 
+/* Hide cursor in fullscreen when controls are hidden */
+:fullscreen .hide-cursor {
+  cursor: none;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

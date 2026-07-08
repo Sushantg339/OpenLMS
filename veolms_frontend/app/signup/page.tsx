@@ -77,7 +77,7 @@ export default function SignupPage() {
               value={form.name}
               onChange={handleChange}
               placeholder="Ada Lovelace"
-              autoComplete="name"
+              autoComplete="off"
               error={errors.name}
               required
             />
@@ -88,7 +88,7 @@ export default function SignupPage() {
               value={form.email}
               onChange={handleChange}
               placeholder="you@example.com"
-              autoComplete="email"
+              autoComplete="off"
               error={errors.email}
               required
             />
@@ -99,18 +99,18 @@ export default function SignupPage() {
               value={form.password}
               onChange={handleChange}
               placeholder="8+ characters"
-              autoComplete="new-password"
+              autoComplete="off"
               error={errors.password}
               required
             />
 
             {errors.general && (
-              <p className="rounded border border-danger-500/30 bg-danger-500/10 px-3 py-2 font-mono text-xs text-danger-400">
+              <p className="rounded border border-danger-500/30 bg-danger-500/10 text-red-500 px-3 py-2 font-mono text-xs text-danger-400">
                 {errors.general}
               </p>
             )}
 
-            <Button type="submit" disabled={loading} className="mt-1 w-full">
+            <Button type="submit" disabled={loading} className="mt-1 w-full cursor-pointer">
               {loading ? "Creating account…" : "Create account"}
             </Button>
           </div>
