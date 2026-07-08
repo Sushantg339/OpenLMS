@@ -222,3 +222,29 @@ export const reorderLessons: RequestHandler = asyncHandler(async (req, res) => {
         error: null,
     })
 })
+
+
+export const getLessonProgress: RequestHandler = asyncHandler(async (req, res) => {
+    const userId = req.user!.id;
+    const lessonId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+
+    if (!lessonId) {
+        return res.status(400).json({
+        success: false,
+        message: "Lesson id is required",
+        data: null,
+        error: { message: "Lesson id must be provided in the URL params." },
+        });
+    }
+
+    const progress = await prisma.lessonProgress.findUnique({
+        where: { userId_lessonId: { userId, lessonId } },
+    });
+
+    return res.status(200).json({
+        success: true,
+        message: "Progress fetched",
+        data: progress,
+        error: null,
+    });
+});
