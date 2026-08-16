@@ -14,7 +14,6 @@
     "prisma:studio": "prisma studio",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "postinstall": "prisma generate",
     "docker:start": "npm run prisma:deploy && npm run start"
   },
   "keywords": [],
