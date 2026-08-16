@@ -91,7 +91,7 @@ export const createOrder = asyncHandler(async (req, res) => {
 
     // Price comes from the DB, never from the client — never trust a client-sent amount
     const razorpayOrder = await razorpay.orders.create({
-        amount: course.price,
+        amount: course.price * 100,
         currency: "INR",
         notes: { courseId, userId }
     })

@@ -169,17 +169,21 @@ export const fetchCourseDetails: RequestHandler = asyncHandler(async (req, res) 
     // req.user is populated by an *optional*-auth middleware on this route (no auth required to view).
     let isEnrolled = false
     if (req.user) {
-        const enrollment = await prisma.enrollment.findUnique({
-            where: { userId_courseId: { userId: req.user.id, courseId: course.id } },
-        })
-        isEnrolled = !!enrollment
+        if (req.user.role === "ADMIN") {
+            isEnrolled = true
+        } else {
+            const enrollment = await prisma.enrollment.findUnique({
+                where: { userId_courseId: { userId: req.user.id, courseId: course.id } },
+            })
+            isEnrolled = !!enrollment
+        }
     }
 
-    const sections = course.sections.map((section) => ({
+    const sections = course.sections.map((section: any) => ({
         ...section,
-        lessons: section.lessons.map(({ videoUrl, ...lesson }) => ({
+        lessons: section.lessons.map(({ videoUrl, ...lesson }: any) => ({
             ...lesson,
-            hasAccess: lesson.isPreview || isEnrolled,
+            hasAccess: lesson.isPreview || isEnrolled || req.user?.role === "ADMIN",
             // never send videoUrl here at all — fetched separately via an authenticated,
             // access-checked endpoint once hasAccess is true
         })),
@@ -188,7 +192,7 @@ export const fetchCourseDetails: RequestHandler = asyncHandler(async (req, res) 
     return res.status(200).json({
         success: true,
         message: "Course details fetched successfully",
-        data: { ...course, sections },
+        data: { ...course, sections, isEnrolled },
         error: null,
     })
 })

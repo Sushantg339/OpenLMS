@@ -78,7 +78,8 @@ export const getLessonVideo = asyncHandler(async (req, res) => {
             message: "Video URL fetched",
             data: { 
                 videoUrl: lesson.videoUrl, 
-                type: "external" 
+                type: "external",
+                courseSlug: lesson.section.course.slug,
             },
             error: null
         })
@@ -104,7 +105,8 @@ export const getLessonVideo = asyncHandler(async (req, res) => {
         data: { 
             videoUrl: signedUrl, 
             type: "signed", 
-            expiresIn: 600 
+            expiresIn: 600,
+            courseSlug: lesson.section.course.slug,
         },
         error: null
     })
