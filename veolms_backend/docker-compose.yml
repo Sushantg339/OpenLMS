@@ -36,7 +36,10 @@ services:
       start_period: 5s
   
   lms_backend:
-    build: .
+    build:
+      context: .
+      args:
+        DATABASE_URL: postgresql://postgres:root@lms_db:5432/lms
     container_name: lms_backend
     restart: unless-stopped
     ports:
