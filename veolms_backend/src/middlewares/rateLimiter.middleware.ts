@@ -16,6 +16,28 @@ export const authLimiter = rateLimit({
     }
 })
 
+export const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: "Too many login attempts. Please try again later.",
+        data: null,
+        error: {
+            message: "Login rate limit exceeded."
+        }
+    }
+});
+
+export const signupLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 // looser, general-purpose limit for the rest of the API — mainly anti-abuse, not anti-brute-force
 export const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
