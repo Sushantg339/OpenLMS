@@ -26,7 +26,7 @@ jobs:
             echo "Deploying OpenLMS Backend"
             echo "================================"
 
-            cd /home/ubuntu/OpenLMS/backend
+            cd /home/ubuntu/OpenLMS/veolms_backend
 
             echo "Pulling latest backend code..."
             git fetch origin master
