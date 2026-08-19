@@ -23,7 +23,7 @@ jobs:
             set -e
 
             echo "================================"
-            echo "Deploying OpenLMS Backend"
+            echo "Deploying OpenLMS Backend to EC2"
             echo "================================"
 
             cd /home/ubuntu/OpenLMS/veolms_backend
