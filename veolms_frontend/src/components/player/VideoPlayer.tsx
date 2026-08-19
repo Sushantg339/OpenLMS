@@ -226,9 +226,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       /*
        * HLS playlist URL.
        */
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 
       const playlistUrl =
-        `http://localhost:3000/api/v1/lessons/${lessonId}/hls/playlist.m3u8`;
+        `${API_BASE_URL}/lessons/${lessonId}/hls/playlist.m3u8`;
 
       /*
        * -----------------------------------------------------
