@@ -17,7 +17,7 @@ export const videoProcessingWorker = new Worker(
         const { lessonId, rawUploadKey } = job.data
 
         const workDir = path.join(
-            "temp",
+            "/tmp",
             "video-processing",
             lessonId
         )

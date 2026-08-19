@@ -97,12 +97,6 @@ export const streamHlsFile = asyncHandler(
             })
         }
 
-        console.log({
-            lessonId,
-            requestedFile,
-            tokenPresent: !!token,
-        })
-
 
         // Prevent path traversal
         if (
@@ -131,7 +125,26 @@ export const streamHlsFile = asyncHandler(
             Key: key,
         })
 
-        const object = await r2Client.send(command)
+        let object
+
+        try {
+            object = await r2Client.send(command)
+        } catch (error) {
+
+            console.error("HLS object not found:", {
+                key,
+                error,
+            })
+
+            return res.status(404).json({
+                success: false,
+                data: null,
+                message: "HLS file not found",
+                error: {
+                    message: "The requested HLS file does not exist.",
+                },
+            })
+        }
 
         if (!object.Body) {
             return res.status(404).end()
@@ -140,25 +153,6 @@ export const streamHlsFile = asyncHandler(
         if (requestedFile.endsWith(".m3u8")) {
 
             const playlist = await object.Body.transformToString()
-
-            const tokenQuery = `token=${encodeURIComponent(token)}`
-
-            const modifiedPlaylist = playlist
-                .split("\n")
-                .map((line) => {
-
-                    const trimmed = line.trim()
-
-                    if (
-                        !trimmed ||
-                        trimmed.startsWith("#")
-                    ) {
-                        return line
-                    }
-
-                    return `${trimmed}?${tokenQuery}`
-                })
-                .join("\n")
 
             res.setHeader(
                 "Content-Type",
@@ -170,7 +164,7 @@ export const streamHlsFile = asyncHandler(
                 "private, no-store"
             )
 
-            return res.send(modifiedPlaylist)
+            return res.send(playlist)
         }
 
         if (object.ContentType) {

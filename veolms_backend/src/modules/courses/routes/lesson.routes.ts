@@ -8,6 +8,7 @@ import { streamHlsFile } from "../controllers/hls.controller.js"
 
 const lessonRouter = express.Router()
 
+lessonRouter.get("/:id/hls/*file", streamHlsFile)
 lessonRouter.use(authMiddleware)
 
 lessonRouter.get('/:id/video', getLessonVideo)
@@ -18,6 +19,5 @@ lessonRouter.get('/:id/progress', getLessonProgress);
 lessonRouter.post('/:id/video/upload-url', requireRole("ADMIN"), requestUploadUrl)
 lessonRouter.post('/:id/video/confirm', requireRole("ADMIN"), confirmUpload)
 lessonRouter.get("/:id/playback-token", authMiddleware, getVideoPlaybackToken)
-lessonRouter.get("/:id/hls/*file", streamHlsFile)
 
 export default lessonRouter
