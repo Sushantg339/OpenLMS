@@ -4,7 +4,7 @@ on:
     branches:
       - master
     paths:
-      - "backend/**"
+      - "veolms_backend/**"
       - ".github/workflows/backend-deploy.yml"
     
 jobs:
