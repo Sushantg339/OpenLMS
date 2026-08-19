@@ -56,7 +56,7 @@ services:
       cache_db:
         condition: service_healthy
         
-    video_worker:
+  video_worker:
     build:
       context: .
       dockerfile: Dockerfile.worker
