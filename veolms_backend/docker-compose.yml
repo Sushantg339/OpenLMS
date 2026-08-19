@@ -55,6 +55,25 @@ services:
         condition: service_healthy
       cache_db:
         condition: service_healthy
+        
+    video_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+      args:
+        DATABASE_URL: postgresql://postgres:root@lms_db:5432/lms
+    container_name: lms_video_worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://postgres:root@lms_db:5432/lms
+      - REDIS_URL=redis://cache_db:6379
+    depends_on:
+      lms_db:
+        condition: service_healthy
+      cache_db:
+        condition: service_healthy
 
 volumes:
   lms_data:

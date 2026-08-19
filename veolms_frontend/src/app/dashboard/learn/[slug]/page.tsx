@@ -22,6 +22,7 @@ export default function StudentLearningPortalPage({ params }: { params: Promise<
   const [loading, setLoading] = useState(true);
   const [videoLoading, setVideoLoading] = useState(false);
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
+  const [videoType, setVideoType] = useState<"external" | "hls" | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -57,21 +58,41 @@ export default function StudentLearningPortalPage({ params }: { params: Promise<
 
   const selectLesson = async (lesson: Lesson) => {
     setActiveLesson(lesson);
-    setVideoLoading(true);
-    try {
-      const res = await api.get(`/lessons/${lesson.id}/video`);
-      setActiveVideoUrl(res.data.data.videoUrl);
+    setActiveVideoUrl(null);
+    setVideoType(null);
 
-      // Check lesson progress
-      const progRes = await api.get(`/lessons/${lesson.id}/progress`);
+    try {
+      const res = await api.get(
+        `/lessons/${lesson.id}/video`
+      );
+
+      setActiveVideoUrl(
+        res.data.data.videoUrl
+      );
+
+      setVideoType(
+        res.data.data.type
+      );
+
+      const progRes = await api.get(
+        `/lessons/${lesson.id}/progress`
+      );
+
       if (progRes.data.data?.completed) {
-        setCompletedLessons((prev) => new Set(prev).add(lesson.id));
+        setCompletedLessons((prev) => {
+          const next = new Set(prev);
+          next.add(lesson.id);
+          return next;
+        });
       }
-    } catch (err: any) {
-      console.warn('Playback URL fetch warning', err);
-      setActiveVideoUrl(lesson.videoUrl || null);
-    } finally {
-      setVideoLoading(false);
+    } catch (err) {
+      console.warn(
+        'Playback URL fetch warning',
+        err
+      );
+
+      setActiveVideoUrl(null);
+      setVideoType(null);
     }
   };
 
@@ -121,19 +142,14 @@ export default function StudentLearningPortalPage({ params }: { params: Promise<
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 overflow-hidden">
         {/* Left 3 Cols: Video Player & Active Lesson Info */}
         <div className="lg:col-span-3 p-6 flex flex-col gap-6 overflow-y-auto">
-          {videoLoading ? (
-            <div className="w-full aspect-video rounded-2xl bg-slate-950 flex items-center justify-center border border-slate-800">
-              <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : (
-            <VideoPlayer
-              lessonId={activeLesson?.id}
-              videoUrl={activeVideoUrl}
-              title={activeLesson?.title}
-              onEnded={handleVideoEnded}
-              autoPlay
-            />
-          )}
+          <VideoPlayer
+            lessonId={activeLesson?.id}
+            videoUrl={activeVideoUrl}
+            videoType={videoType}
+            title={activeLesson?.title}
+            onEnded={handleVideoEnded}
+            autoPlay
+          />
 
           <div className="glass-panel p-6 rounded-2xl border-slate-800 flex flex-col gap-3">
             <div className="flex justify-between items-center">

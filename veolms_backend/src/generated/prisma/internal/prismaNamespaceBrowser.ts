@@ -124,7 +124,8 @@ export const LessonScalarFieldEnum = {
   status: 'status',
   durationSeconds: 'durationSeconds',
   isPreview: 'isPreview',
-  orderIndex: 'orderIndex'
+  orderIndex: 'orderIndex',
+  hlsKey: 'hlsKey'
 } as const
 
 export type LessonScalarFieldEnum = (typeof LessonScalarFieldEnum)[keyof typeof LessonScalarFieldEnum]

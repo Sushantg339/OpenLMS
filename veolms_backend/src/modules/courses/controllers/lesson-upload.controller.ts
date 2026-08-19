@@ -8,6 +8,7 @@ import { r2Client, R2_BUCKET } from "../../../lib/r2.js"
 import { requestUploadUrlSchema } from "../zod/lesson-upload.schema.js"
 import { prisma } from "../../../lib/prisma.js"
 import asyncHandler from "../../../utils/asyncHandler.js"
+import { videoProcessingQueue } from "../../../queues/video-processing.queue.js"
 
 const ALLOWED_EXTENSIONS = ["mp4", "webm"]
 
@@ -143,7 +144,12 @@ export const confirmUpload = asyncHandler(async (req, res) => {
 
     const updated = await prisma.lesson.update({
         where: { id: lessonId as string },
-        data: { status: "READY" },
+        data: { status: "PROCESSING" },
+    })
+
+    await videoProcessingQueue.add("process-video", {
+        lessonId: lesson.id,
+        rawUploadKey: lesson.rawUploadKey
     })
 
     return res.status(200).json({
