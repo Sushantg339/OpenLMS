@@ -67,7 +67,7 @@ export const videoProcessingWorker = new Worker(
             )
 
             
-            const hlsPrefix = `hls/${lessonId}`
+            const hlsPrefix = `raw/${lessonId}/hls`
             console.log(`HLS uploading to R2 : ${hlsPrefix}`)
 
             await uploadHlsDirectory(
@@ -79,7 +79,7 @@ export const videoProcessingWorker = new Worker(
                 `HLS uploaded to R2: ${hlsPrefix}`
             )
 
-            const hlsKey = `hls/${lessonId}/playlist.m3u8`
+            const hlsKey = `${hlsPrefix}/playlist.m3u8`
 
             await prisma.lesson.update({
                 where: {
